@@ -1,0 +1,58 @@
+{
+    "seed": 0,
+    "description": "",
+    "save_location": "/search/speech/haoxiang/Experiments/EHNet",
+    "n_gpu": 1,
+    "use_cudnn": true,
+    "trainer": {
+        "epochs": 50,
+        "save_checkpoint_interval": 1,
+        "validation_interval": 1,
+        "find_max": true,
+        "z_score": false
+    },
+    "model": {
+        "module": "model.crn_in_paper_batch_norm",
+        "main": "CRNN",
+        "args": {}
+    },
+    "loss_function": {
+        "module": "model.loss",
+        "main": "mse_loss",
+        "args": {}
+    },
+    "optimizer": {
+        "lr": 0.0006,
+        "beta1": 0.9
+    },
+    "train_dataset": {
+        "module": "dataset.wav_dataset",
+        "main": "WavDataset",
+        "args": {
+            "mixture_dataset": "/search/speech/haoxiang/Datasets/SogouDialogData_trim_100h_noisy_wav",
+            "clean_dataset": "/search/speech/haoxiang/Datasets/SogouDialogData_trim_100h_clean_wav",
+            "limit": null,
+            "offset": 0
+        }
+    },
+    "validation_dataset": {
+        "module": "dataset.wav_dataset",
+        "main": "WavDataset",
+        "args": {
+            "mixture_dataset": "/search/odin/haoxiang/Datasets/validation_8s_10sent_6con/noisy",
+            "clean_dataset": "/search/odin/haoxiang/Datasets/validation_8s_10sent_6con/clean",
+            "limit": 60,
+            "offset": 0
+        }
+    },
+    "train_dataloader": {
+        "shuffle": true,
+        "num_workers": 40,
+        "batch_size": 16
+    },
+    "validation_dataloader": {
+        "shuffle": true,
+        "num_workers": 40,
+        "batch_size": 40
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "experiments_dir": "/search/speech/haoxiang/Experiments/EHNet",
+    "enhancement_dir": "/search/speech/haoxiang/Experiments/EHNet",
+    "model": {
+        "module": "model.default",
+        "main": "CRNN",
+        "args": {}
+    },
+    "dataset": {
+        "module": "dataset.wav_dataset",
+        "main": "WavDataset",
+        "args": {
+            "mixture_dataset": "/search/odin/haoxiang/Datasets/SogouTest_K_A_2501",
+            "clean_dataset": "/search/odin/haoxiang/Datasets/SogouTest_K_A_2501"
+        }
+    }
+}
