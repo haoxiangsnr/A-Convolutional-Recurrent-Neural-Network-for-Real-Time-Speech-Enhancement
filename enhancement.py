@@ -29,8 +29,8 @@ def main(config, epoch):
 
     """============== 加载模型断点（"best"，"latest"，通过数字指定） =============="""
     model = initialize_config(config["model"])
-    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-    # device = torch.device("cpu")
+    # device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cpu")
     stft = STFT(
         filter_length=320,
         hop_length=160

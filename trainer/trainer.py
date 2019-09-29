@@ -5,6 +5,8 @@ from torch.nn.utils.rnn import pad_sequence
 
 from trainer.base_trainer import BaseTrainer
 import matplotlib.pyplot as plt
+
+plt.switch_backend("agg")
 plt.rcParams.update({'figure.max_open_warning': 0})
 import numpy as np
 import librosa.display
