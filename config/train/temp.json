@@ -1,8 +1,8 @@
 {
     "seed": 0,
     "description": "",
-    "save_location": "/search/speech/haoxiang/Experiments/EHNet",
-    "n_gpu": 1,
+    "save_location": "/media/imucs/DataDisk/haoxiang/Experiment/A-Convolutional-Recurrent-Neural-Network-for-Real-Time-Speech-Enhancement",
+    "n_gpu": 4,
     "use_cudnn": true,
     "trainer": {
         "epochs": 50,
@@ -29,8 +29,8 @@
         "module": "dataset.wav_dataset",
         "main": "WavDataset",
         "args": {
-            "mixture_dataset": "/search/speech/haoxiang/Datasets/SogouDialogData_trim_100h_noisy_wav",
-            "clean_dataset": "/search/speech/haoxiang/Datasets/SogouDialogData_trim_100h_clean_wav",
+            "mixture_dataset": "/home/imucs/Datasets/2019-09-03-timit_train-900_test-50/train/noisy",
+            "clean_dataset": "/home/imucs/Datasets/2019-09-03-timit_train-900_test-50/train/clean",
             "limit": null,
             "offset": 0
         }
@@ -39,16 +39,16 @@
         "module": "dataset.wav_dataset",
         "main": "WavDataset",
         "args": {
-            "mixture_dataset": "/search/odin/haoxiang/Datasets/validation_8s_10sent_6con/noisy",
-            "clean_dataset": "/search/odin/haoxiang/Datasets/validation_8s_10sent_6con/clean",
-            "limit": 60,
+            "mixture_dataset": "/home/imucs/Datasets/2019-09-03-timit_train-900_test-50/test/noisy",
+            "clean_dataset": "/home/imucs/Datasets/2019-09-03-timit_train-900_test-50/test/clean",
+            "limit": 400,
             "offset": 0
         }
     },
     "train_dataloader": {
         "shuffle": true,
         "num_workers": 40,
-        "batch_size": 16
+        "batch_size": 32
     },
     "validation_dataloader": {
         "shuffle": true,

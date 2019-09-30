@@ -3,15 +3,13 @@ import json
 import os
 from pathlib import Path
 
-import librosa
-import numpy as np
-import torch
-from tqdm import tqdm
-from torch.utils.data import DataLoader
 import soundfile as sf
+import torch
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from utils.stft import STFT
-from utils.utils import initialize_config, compute_PESQ
+from utils.utils import initialize_config
 
 
 def main(config, epoch):
@@ -65,7 +63,7 @@ def main(config, epoch):
 
     results_dir.mkdir(parents=True, exist_ok=True)
 
-    for i, (mixture, clean, _, names) in enumerate(dataloader):
+    for i, (mixture, _, _, names) in enumerate(dataloader):
         print(f"Enhance {i + 1}th speech")
         name = names[0]
 
@@ -74,7 +72,7 @@ def main(config, epoch):
         mixture_D = stft.transform(mixture)
         mixture_real = mixture_D[:, :, :, 0]
         mixture_imag = mixture_D[:, :, :, 1]
-        mixture_mag = torch.sqrt(mixture_real ** 2 + mixture_imag ** 2) # [1, T, F]
+        mixture_mag = torch.sqrt(mixture_real ** 2 + mixture_imag ** 2)  # [1, T, F]
 
         print("\tEnhancement...")
         mixture_mag_chunks = torch.split(mixture_mag, mixture_mag.size()[1] // 5, dim=1)
@@ -82,15 +80,17 @@ def main(config, epoch):
         enhanced_mag_chunks = []
         for mixture_mag_chunk in tqdm(mixture_mag_chunks):
             mixture_mag_chunk = mixture_mag_chunk.to(device)
-            enhanced_mag_chunks.append(model(mixture_mag_chunk).detach().cpu()) # [T, F]
+            enhanced_mag_chunks.append(model(mixture_mag_chunk).detach().cpu())  # [T, F]
 
-        enhanced_mag = torch.cat(enhanced_mag_chunks, dim=0).unsqueeze(0) # [1, T, F]
+        enhanced_mag = torch.cat(enhanced_mag_chunks, dim=0).unsqueeze(0)  # [1, T, F]
 
         # enhanced_mag = enhanced_mag.detach().cpu().data.numpy()
         # mixture_mag = mixture_mag.cpu()
 
-        enhanced_real = enhanced_mag * mixture_real[:, :enhanced_mag.size(1), :] / mixture_mag[:, :enhanced_mag.size(1), :]
-        enhanced_imag = enhanced_mag * mixture_imag[:, :enhanced_mag.size(1), :] / mixture_mag[:, :enhanced_mag.size(1), :]
+        enhanced_real = enhanced_mag * mixture_real[:, :enhanced_mag.size(1), :] / mixture_mag[:, :enhanced_mag.size(1),
+                                                                                   :]
+        enhanced_imag = enhanced_mag * mixture_imag[:, :enhanced_mag.size(1), :] / mixture_mag[:, :enhanced_mag.size(1),
+                                                                                   :]
 
         enhanced_D = torch.stack([enhanced_real, enhanced_imag], 3)
         enhanced = stft.inverse(enhanced_D)
@@ -104,13 +104,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("Spectrogram mapping: Speech Enhancement")
     parser.add_argument("-C", "--config", type=str, required=True,
                         help="Specify the configuration file for enhancement (*.json).")
-    parser.add_argument('-D', '--device', default=None, type=str, help="GPU for speech enhancement.")
     parser.add_argument("-E", "--epoch", default="best",
                         help="Model checkpoint for speech enhancement, can be set to 'best', 'latest' and specific epoch. (default: 'best')")
     args = parser.parse_args()
-
-    if args.device:
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
     config = json.load(open(args.config))
     config["name"] = os.path.splitext(os.path.basename(args.config))[0]
