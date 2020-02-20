@@ -23,6 +23,8 @@ class WavDataset(Dataset):
             limit (int): the limit of the dataset
             offset (int): the offset of the dataset
         """
+        mixture_dataset = os.path.abspath(os.path.expanduser(mixture_dataset))
+
         assert os.path.exists(mixture_dataset)
 
         print("Search datasets...")
