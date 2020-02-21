@@ -1,14 +1,10 @@
 # bus
-config/train/*
-!config/train/temp.json
-config/enhancement/*
-!config/enhancement/temp.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-.vscod
+.vscode
 # C extensions
 *.so
 
