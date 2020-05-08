@@ -75,14 +75,7 @@ def main(config, epoch):
         mixture_mag = torch.sqrt(mixture_real ** 2 + mixture_imag ** 2)  # [1, T, F]
 
         print("\tEnhancement...")
-        mixture_mag_chunks = torch.split(mixture_mag, mixture_mag.size()[1] // 5, dim=1)
-        mixture_mag_chunks = mixture_mag_chunks[:-1]
-        enhanced_mag_chunks = []
-        for mixture_mag_chunk in tqdm(mixture_mag_chunks):
-            mixture_mag_chunk = mixture_mag_chunk.to(device)
-            enhanced_mag_chunks.append(model(mixture_mag_chunk).detach().cpu())  # [T, F]
-
-        enhanced_mag = torch.cat(enhanced_mag_chunks, dim=0).unsqueeze(0)  # [1, T, F]
+        enhanced_mag = model(mixture_mag_chunk).detach().cpu().unsqueeze(0)  # [1, T, F]
 
         # enhanced_mag = enhanced_mag.detach().cpu().data.numpy()
         # mixture_mag = mixture_mag.cpu()
