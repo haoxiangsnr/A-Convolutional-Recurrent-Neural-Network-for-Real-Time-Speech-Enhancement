@@ -2,11 +2,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
+
 class CRNN(nn.Module):
     """
     Input: [batch size, channels=1, T, n_fft]
     Output: [batch size, T, n_fft]
     """
+
     def __init__(self):
         super(CRNN, self).__init__()
         # Encoder
@@ -32,7 +34,8 @@ class CRNN(nn.Module):
         self.convT3 = nn.ConvTranspose2d(in_channels=128, out_channels=32, kernel_size=(2, 3), stride=(1, 2))
         self.bnT3 = nn.GroupNorm(1, 32)
         # output_padding为1，不然算出来是79
-        self.convT4 = nn.ConvTranspose2d(in_channels=64, out_channels=16, kernel_size=(2, 3), stride=(1, 2), output_padding=(0, 1))
+        self.convT4 = nn.ConvTranspose2d(in_channels=64, out_channels=16, kernel_size=(2, 3), stride=(1, 2),
+                                         output_padding=(0, 1))
         self.bnT4 = nn.GroupNorm(1, 16)
         self.convT5 = nn.ConvTranspose2d(in_channels=32, out_channels=1, kernel_size=(2, 3), stride=(1, 2))
         self.bnT5 = nn.GroupNorm(1, 1)

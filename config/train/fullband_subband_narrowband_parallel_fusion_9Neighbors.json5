@@ -1,0 +1,77 @@
+{
+    "seed": 0,
+    "description": "null",
+    "root_dir": "~/Experiments/Wide-Narrow-Band-Fusion/Fullband_Subband_Narrowband_Fusion",
+    "cudnn_deterministic": false,
+    "trainer": {
+        "module": "trainer.trainer_fixed_length_input_full_band",
+        "main": "Trainer",
+        "epochs": 1200,
+        "save_checkpoint_interval": 10,
+        "validation": {
+            "interval": 10,
+            "find_max": true,
+            "custom": {
+                "visualization_limit": 20,
+                "n_fft": 320,
+                "win_length": 320,
+                "hop_length": 160,
+                "unfold_size": 256,
+                "validation_batch_size": 100,
+                "inference_type": "full_band_no_truncation"
+            }
+        }
+    },
+    "model": {
+        "module": "model.fullband_subband_narrowband_parallel_fusion",
+        "main": "Model",
+        "args": {
+            "n_neighbor": 9,
+            "pad_mode": "reflect",
+        }
+    },
+    "loss_function": {
+        "module": "model.loss",
+        "main": "mse_loss",
+        "args": {}
+    },
+    "optimizer": {
+        "lr": 0.0002,
+        "beta1": 0.9,
+        "beta2": 0.999
+    },
+    "train_dataset": {
+        "module": "dataset.dataset_fixed_length_input",
+        "main": "Dataset",
+        "args": {
+            "dataset_list": "~/Datasets/SEGAN_Dataset/train_dataset.txt",
+            "limit": null,
+            "offset": 0,
+            "sr": 16000,
+            "n_fft": 320,
+            "hop_length": 160,
+            "unfold_size": 256,
+            "train": true
+        }
+    },
+    "validation_dataset": {
+        "module": "dataset.dataset_fixed_length_input",
+        "main": "Dataset",
+        "args": {
+            "dataset_list": "~/Datasets/SEGAN_Dataset/test_dataset.txt",
+            "limit": null,
+            "offset": 0,
+            "sr": 16000,
+            "n_fft": 320,
+            "hop_length": 160,
+            "unfold_size": 256,
+            "train": false
+        },
+    },
+    "train_dataloader": {
+        "batch_size": 80,
+        "num_workers": 40,
+        "shuffle": true,
+        "pin_memory": true
+    }
+}

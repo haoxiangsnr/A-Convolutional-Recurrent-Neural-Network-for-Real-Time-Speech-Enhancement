@@ -1,0 +1,71 @@
+{
+    "seed": 0,
+    "description": "null",
+    "root_dir": "~/Experiments/CRN",
+    "cudnn_deterministic": false,
+    "trainer": {
+        "module": "trainer.causal_trainer",
+        "main": "Trainer",
+        "epochs": 100,
+        "save_checkpoint_interval": 1,
+        "validation": {
+            "interval": 1,
+            "find_max": true,
+            "custom": {
+                "visualization_limit": 20,
+                "n_fft": 320,
+                "win_length": 320,
+                "hop_length": 160
+            }
+        }
+    },
+    "model": {
+        "module": "model.crn",
+        "main": "Model",
+        "args": {}
+    },
+    "loss_function": {
+        "module": "model.loss",
+        "main": "mse_loss",
+        "args": {}
+    },
+    "optimizer": {
+        "lr": 0.001,
+        "beta1": 0.9,
+        "beta2": 0.999
+    },
+    "train_dataset": {
+        "module": "dataset.dataset_fixed_length_input",
+        "main": "Dataset",
+        "args": {
+            "dataset_list": "~/Datasets/SEGAN_Dataset/train_dataset.txt",
+            "limit": null,
+            "offset": 0,
+            "sr": 16000,
+            "n_fft": 320,
+            "hop_length": 160,
+            "unfold_size": 256,
+            "train": true
+        }
+    },
+    "validation_dataset": {
+        "module": "dataset.dataset_fixed_length_input",
+        "main": "Dataset",
+        "args": {
+            "dataset_list": "~/Datasets/SEGAN_Dataset/test_dataset.txt",
+            "limit": null,
+            "offset": 0,
+            "sr": 16000,
+            "n_fft": 320,
+            "hop_length": 160,
+            "unfold_size": 256,
+            "train": false
+        },
+    },
+    "train_dataloader": {
+        "batch_size": 80,
+        "num_workers": 40,
+        "shuffle": true,
+        "pin_memory": true
+    }
+}
