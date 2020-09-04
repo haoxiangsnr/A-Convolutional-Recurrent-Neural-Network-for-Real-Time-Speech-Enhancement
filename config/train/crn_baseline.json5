@@ -4,12 +4,12 @@
     "root_dir": "~/Experiments/CRN",
     "cudnn_deterministic": false,
     "trainer": {
-        "module": "trainer.causal_trainer",
+        "module": "trainer.trainer_fixed_length_input",
         "main": "Trainer",
-        "epochs": 500,
-        "save_checkpoint_interval": 1,
+        "epochs": 1200,
+        "save_checkpoint_interval": 5,
         "validation": {
-            "interval": 1,
+            "interval": 5,
             "find_max": true,
             "custom": {
                 "visualization_limit": 20,
@@ -20,9 +20,10 @@
         }
     },
     "model": {
-        "module": "model.crn",
-        "main": "CRN",
-        "args": {}
+        "module": "model.crn_in_paper_batch_norm",
+        "main": "Model",
+        "args": {
+        }
     },
     "loss_function": {
         "module": "model.loss",

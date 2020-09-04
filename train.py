@@ -1,69 +1,57 @@
 import argparse
-import json
 import os
 
-parser = argparse.ArgumentParser(description='EHNET')
-parser.add_argument("-C", "--config", required=True, type=str,
-                    help="Specify the configuration file for training (*.json).")
-parser.add_argument('-D', '--device', default=None, type=str,
-                    help="Specify the GPU visible in the experiment, e.g. '1,2,3'.")
-parser.add_argument("-R", "--resume", action="store_true",
-                    help="Whether to resume training from a recent breakpoint.")
-args = parser.parse_args()
-
-if args.device:
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.device
-
+import json5
 import numpy as np
 import torch
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
 
-from trainer.trainer import Trainer
-from utils.utils import initialize_config
-from torch.nn.utils.rnn import pad_sequence
+from util.utils import initialize_config
 
 
 def main(config, resume):
+    # Random seed for both CPU and GPU.
     torch.manual_seed(config["seed"])
     np.random.seed(config["seed"])
 
-    def pad_to_longest(batch):
-        mixture_list = []
+    def collate_fn_pad(batch):
+        """
+        Returns:
+            [B, F, T (Longest)]
+        """
+        noisy_list = []
         clean_list = []
-        names = []
         n_frames_list = []
+        names = []
 
-        for mixture, clean, n_frames, name in batch:
-            mixture_list.append(torch.tensor(mixture).reshape(-1, 1))
-            clean_list.append(torch.tensor(clean).reshape(-1, 1))
+        for noisy, clean, n_frames, name in batch:
+            noisy_list.append(torch.tensor(noisy).permute(1, 0))  # [F, T] => [T, F]
+            clean_list.append(torch.tensor(clean).permute(1, 0))  # [1, T] => [T, 1]
             n_frames_list.append(n_frames)
             names.append(name)
 
-        # seq_list = [(L_1, 1), (L_2, 1), ...]
-        #   item.size() must be (L, *)
-        #   return (longest_len, len(seq_list), *)
-        mixture_list = pad_sequence(mixture_list).squeeze(2).permute(1, 0)
-        clean_list = pad_sequence(clean_list).squeeze(2).permute(1, 0)
+        # seq_list = [(T1, F), (T2, F), ...]
+        #   item.size() must be (T, *)
+        #   return (longest_T, len(seq_list), *)
+        noisy_list = pad_sequence(noisy_list).permute(1, 2, 0)  # ([T1, F], [T2, F], ...) => [T, B, F] => [B, F, T]
+        clean_list = pad_sequence(clean_list).permute(1, 2, 0)  # ([T1, 1], [T2, 1], ...) => [T, B, 1] => [B, 1, T]
 
-        return mixture_list, clean_list, n_frames_list, names
+        return noisy_list, clean_list, n_frames_list, names
 
-    train_dataset = initialize_config(config["train_dataset"])
-    train_data_loader = DataLoader(
-        shuffle=config["train_dataloader"]["shuffle"],
-        dataset=train_dataset,
+    train_dataloader = DataLoader(
+        dataset=initialize_config(config["train_dataset"]),
         batch_size=config["train_dataloader"]["batch_size"],
         num_workers=config["train_dataloader"]["num_workers"],
-        collate_fn=pad_to_longest,
-        drop_last=True
+        shuffle=config["train_dataloader"]["shuffle"],
+        pin_memory=config["train_dataloader"]["pin_memory"],
+        collate_fn=collate_fn_pad
     )
 
-    validation_dataset = initialize_config(config["validation_dataset"])
-    valid_data_loader = DataLoader(
-        dataset=validation_dataset,
-        num_workers=config["validation_dataloader"]["num_workers"],
-        batch_size=config["validation_dataloader"]["batch_size"],
-        collate_fn=pad_to_longest,
-        shuffle=config["validation_dataloader"]["shuffle"]
+    valid_dataloader = DataLoader(
+        dataset=initialize_config(config["validation_dataset"]),
+        num_workers=0,
+        batch_size=1
     )
 
     model = initialize_config(config["model"])
@@ -71,28 +59,38 @@ def main(config, resume):
     optimizer = torch.optim.Adam(
         params=model.parameters(),
         lr=config["optimizer"]["lr"],
-        betas=(config["optimizer"]["beta1"], 0.999)
+        betas=(config["optimizer"]["beta1"], config["optimizer"]["beta2"])
     )
 
     loss_function = initialize_config(config["loss_function"])
+    trainer_class = initialize_config(config["trainer"], pass_args=False)
 
-    trainer = Trainer(
+    trainer = trainer_class(
         config=config,
         resume=resume,
         model=model,
-        optimizer=optimizer,
         loss_function=loss_function,
-        train_dataloader=train_data_loader,
-        validation_dataloader=valid_data_loader
+        optimizer=optimizer,
+        train_dataloader=train_dataloader,
+        validation_dataloader=valid_dataloader
     )
 
     trainer.train()
 
 
 if __name__ == '__main__':
-    # load config file
-    config = json.load(open(args.config))
-    config["experiment_name"] = os.path.splitext(os.path.basename(args.config))[0]
-    config["train_config_path"] = args.config
+    parser = argparse.ArgumentParser(description="CRN")
+    parser.add_argument("-C", "--configuration", required=True, type=str, help="Configuration (*.json).")
+    parser.add_argument("-P", "--preloaded_model_path", type=str, help="Path of the *.Pth file of the model.")
+    parser.add_argument("-R", "--resume", action="store_true", help="Resume experiment from latest checkpoint.")
+    args = parser.parse_args()
 
-    main(config, resume=args.resume)
+    if args.preloaded_model_path:
+        assert not args.resume, "Resume conflict with preloaded model. Please use one of them."
+
+    configuration = json5.load(open(args.configuration))
+    configuration["experiment_name"], _ = os.path.splitext(os.path.basename(args.configuration))
+    configuration["config_path"] = args.configuration
+    configuration["preloaded_model_path"] = args.preloaded_model_path
+
+    main(configuration, resume=args.resume)

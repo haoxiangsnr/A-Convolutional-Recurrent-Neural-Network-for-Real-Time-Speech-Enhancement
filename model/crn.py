@@ -43,7 +43,7 @@ class CausalTransConvBlock(nn.Module):
         )
         self.norm = nn.BatchNorm2d(num_features=out_channels)
         if is_last:
-            self.activation = nn.Softplus()
+            self.activation = nn.ReLU()
         else:
             self.activation = nn.ELU()
 
@@ -88,6 +88,8 @@ class CRN(nn.Module):
         self.tran_conv_block_5 = CausalTransConvBlock(16 + 16, 1, is_last=True)
 
     def forward(self, x):
+        self.lstm_layer.flatten_parameters()
+
         e_1 = self.conv_block_1(x)
         e_2 = self.conv_block_2(e_1)
         e_3 = self.conv_block_3(e_2)

@@ -1,0 +1,26 @@
+{
+    "model": {
+        "module": "model.crn",
+        "main": "CRN",
+        "args": {}
+    },
+    "dataset": {
+        "module": "dataset.dataset_enhancement",
+        "main": "Dataset",
+        "args": {
+            "noisy_dataset": "~/Datasets/SEGAN_Dataset/noisy_testset_wav",
+            "limit": null,
+            "offset": 0,
+            "sr": 16000
+        }
+    },
+    "inference": {
+        "module": "inferencer.inferencer",
+        "main": "Inferencer",
+        "n_fft": 320,
+        "hop_length": 160,
+        "win_length": 320,
+        "sr": 16000,
+        "inference_type": "full_band_no_truncation"
+    }
+}

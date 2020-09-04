@@ -1,28 +1,28 @@
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-# Copy from https://github.com/YangYang/CRNN_mapping_baseline/blob/master/utils/loss_utils.py
-def mse_loss():
-    def loss_function(est, label, nframes):
+
+def mse_loss_for_variable_length_data():
+    def loss_function(target, ipt, n_frames_list, device):
         """
-        计算真实的MSE
-        :param est: 网络输出
-        :param label: label
-        :param nframes: 每个batch中的真实帧长
-        :return:loss
+        Calculate the MSE loss for variable length dataset.
+
+        ipt: [B, F, T]
+        target: [B, F, T]
         """
-        EPSILON = 1e-7
+        if target.shape[0] == 1:
+            return torch.nn.functional.mse_loss(target, ipt)
+
+        E = 1e-8
         with torch.no_grad():
-            mask_for_loss_list = []
-            # 制作掩码
-            for frame_num in nframes:
-                mask_for_loss_list.append(torch.ones(frame_num, label.size()[2], dtype=torch.float32))
-            # input: list of tensor
-            # output: B T F
-            mask_for_loss = pad_sequence(mask_for_loss_list, batch_first=True).cuda()
-        # 使用掩码计算真实值
-        masked_est = est * mask_for_loss
-        masked_label = label * mask_for_loss
-        loss = ((masked_est - masked_label) ** 2).sum() / mask_for_loss.sum() + EPSILON
-        return loss
+            masks = []
+            for n_frames in n_frames_list:
+                masks.append(torch.ones(n_frames, target.size(1), dtype=torch.float32))  # the shape is (T_real, F)
+
+            binary_mask = pad_sequence(masks, batch_first=True).to(device).permute(0, 2, 1)  # ([T1, F], [T2, F]) => [B, T, F] => [B, F, T]
+
+        masked_ipt = ipt * binary_mask  # [B, F, T]
+        masked_target = target * binary_mask
+        return ((masked_ipt - masked_target) ** 2).sum() / (binary_mask.sum() + E)  # 不算 pad 部分的贡献，仅计算有效值
+
     return loss_function
