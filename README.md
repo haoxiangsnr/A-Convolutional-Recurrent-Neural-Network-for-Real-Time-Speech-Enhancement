@@ -10,12 +10,11 @@ A minimum unofficial implementation of the [A Convolutional Recurrent Neural Net
 
 ## Usage
 
-Training the CNR model:
+Training:
 
 ```
-
+TODO
 ```
-
 
 Inference:
 
@@ -38,10 +37,13 @@ PESQ metric on a private dataset, for reference only
 | Our implementation |2.630 | 2.458 | 2.086 | 2.729 | 2.527 | 2.172 | 2.434 |  |
 | Our implementation (LN) | 2.703 | 2.461 | 1.961 | 2.796 | 2.548 | 2.181 | 2.442 | Replace all batch norm with layer norm |
 
-PESQ, STOI, SI-SDR metrics on SEGAN dataset
 
-crn 2.528 17.71 0.9325
-crn_mask 2.606 17.84 0.9382
+PESQ, STOI, SI-SDR metrics on SEGAN dataset.
+
+| Experiment | PESQ | SI-SDR | STOI |
+| --- | --- | --- | --- |
+|crn | 2.528| 17.71| 0.9325|
+|crn_mask |2.606 |17.84 |0.9382|
 
 ## Dependencies
 
