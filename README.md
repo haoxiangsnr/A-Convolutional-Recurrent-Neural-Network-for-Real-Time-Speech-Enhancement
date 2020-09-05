@@ -13,37 +13,29 @@ A minimum unofficial implementation of the [A Convolutional Recurrent Neural Net
 Training:
 
 ```
-TODO
+python train.py -C config/train/baseline_model.json5
 ```
 
 Inference:
 
-``
+```
 python inference.py \
     -C config/inference/basic.json5 \
     -cp ~/Experiments/CRN/baseline_model/checkpoints/latest_model.tar \
-     -dist ./enhanced
-``
+    -dist ./enhanced
+```
+
+Check out the README of [Wave-U-Net for SE](https://github.com/haoxiangsnr/Wave-U-Net-for-Speech-Enhancement) to learn more.
 
 ## Performance
 
-PESQ metric on a private dataset, for reference only
-
-| Experiment |  | 5dB |  |  | 10dB |  | Average | Comment |
-| :---: | :---: | :---: | :---: | --- | --- | --- | --- | --- |
-|  | 0.5m | 1m | 2m | 0.5m | 1m | 2m | | Distance to microphone |
-| Mixture | 2.33 | 2.17 | 1.85 | 2.44 | 2.27 | 1.94 | 2.167 |  |
-| LSTM | 2.62 | 2.49 | 2.02 | 2.71 | 2.53 | 2.13 | 2.417 |  |
-| Our implementation |2.630 | 2.458 | 2.086 | 2.729 | 2.527 | 2.172 | 2.434 |  |
-| Our implementation (LN) | 2.703 | 2.461 | 1.961 | 2.796 | 2.548 | 2.181 | 2.442 | Replace all batch norm with layer norm |
-
-
-PESQ, STOI, SI-SDR metrics on SEGAN dataset.
+PESQ, STOI, SI-SDR on DEMAND - Voice Bank test dataset, for reference only:
 
 | Experiment | PESQ | SI-SDR | STOI |
 | --- | --- | --- | --- |
-|crn | 2.528| 17.71| 0.9325|
-|crn_mask |2.606 |17.84 |0.9382|
+|Noisy | 1.979 | 8.511| 0.9258|
+|CRN | 2.528| 17.71| 0.9325|
+|CRN signal approximation  |2.606 |17.84 |0.9382|
 
 ## Dependencies
 

@@ -25,7 +25,6 @@ def inference_wrapper(
         else:
             raise NotImplementedError(f"Not implemented Inferencer type: {inference_args['inference_type']}")
 
-        print(enhanced_dir / f"{name}.wav")
         librosa.output.write_wav(enhanced_dir / f"{name}.wav", enhanced, sr=16000)
 
 
